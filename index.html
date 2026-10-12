@@ -96,7 +96,7 @@ var DATA={
   ],
   boys:[
     {name:"Amir", title:"رئیس کصخلا", img:"img/b1.jpg"},
-    {name:"Saleh", title:"کدخول", img:"img/b2.jpg"},
+    {name:"Saleh", title:"کدخول", img:"img/b2.jpg", pos:"50% 8%"},
   ]
 };
 
@@ -108,7 +108,7 @@ function show(){
   L.forEach(function(it,i){
     var c=document.createElement('div');c.className='card'+(i===0?' t1':'');
     c.innerHTML='<img alt=""><span class="rk"></span><b></b><i class="tt"></i>';
-    c.querySelector('img').src=it.img;c.querySelector('.rk').textContent=medals[i]||(i+1);c.querySelector('b').textContent=it.name;c.querySelector('.tt').textContent=it.title||'';
+    c.querySelector('img').src=it.img;c.querySelector('img').style.objectPosition=it.pos||'50% 50%';c.querySelector('.rk').textContent=medals[i]||(i+1);c.querySelector('b').textContent=it.name;c.querySelector('.tt').textContent=it.title||'';
     c.onclick=function(){lb.querySelector('img').src=it.img;lb.querySelector('p').textContent=(medals[i]||('#'+(i+1)))+' '+it.name+(it.title?' — '+it.title:'');lb.style.display='flex'};
     grid.appendChild(c);
   });
