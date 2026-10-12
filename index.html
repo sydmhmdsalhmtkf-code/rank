@@ -22,6 +22,7 @@ h1{text-align:center;font-weight:900;font-size:clamp(1.6rem,6vw,2.4rem);backgrou
 .card.t1{border-color:#ffc107;box-shadow:0 0 20px #ffc10766}
 .card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 .card b{display:block;margin-top:8px;padding:0 6px}
+.tt{display:block;font-style:normal;font-weight:900;font-size:.85rem;color:var(--ac);margin-top:2px}
 .rk{position:absolute;top:8px;right:8px;font-size:1.5rem;font-weight:900;background:#000a;color:#fff;border-radius:12px;padding:0 10px}
 .empty{text-align:center;opacity:.7;padding:50px 10px;grid-column:1/-1}
 #lb{position:fixed;inset:0;z-index:50;background:#000d;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
@@ -93,7 +94,7 @@ var DATA={
     // {name:"اسم", img:"img/g1.jpg"},
   ],
   boys:[
-    // {name:"اسم", img:"img/b1.jpg"},
+    {name:"Amir", title:"رئیس کصخلا", img:"img/b1.jpg"},
   ]
 };
 
@@ -104,9 +105,9 @@ function show(){
   if(!L.length){grid.innerHTML='<div class="empty">به‌زودی... 🦋</div>';return}
   L.forEach(function(it,i){
     var c=document.createElement('div');c.className='card'+(i===0?' t1':'');
-    c.innerHTML='<img alt=""><span class="rk"></span><b></b>';
-    c.querySelector('img').src=it.img;c.querySelector('.rk').textContent=medals[i]||(i+1);c.querySelector('b').textContent=it.name;
-    c.onclick=function(){lb.querySelector('img').src=it.img;lb.querySelector('p').textContent=(medals[i]||('#'+(i+1)))+' '+it.name;lb.style.display='flex'};
+    c.innerHTML='<img alt=""><span class="rk"></span><b></b><i class="tt"></i>';
+    c.querySelector('img').src=it.img;c.querySelector('.rk').textContent=medals[i]||(i+1);c.querySelector('b').textContent=it.name;c.querySelector('.tt').textContent=it.title||'';
+    c.onclick=function(){lb.querySelector('img').src=it.img;lb.querySelector('p').textContent=(medals[i]||('#'+(i+1)))+' '+it.name+(it.title?' — '+it.title:'');lb.style.display='flex'};
     grid.appendChild(c);
   });
 }
