@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تعیین مقام کصخل ها</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg1:#ffe3f1;--bg2:#e6dcff;--card:#ffffffcc;--tx:#3b1346;--ac:#e91e8c;--ac2:#8e44ff;--bd:#f3b6d9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#2a0a3a;--bg2:#12062b;--card:#2d1744cc;--tx:#ffe9f6;--bd:#6b2d85}}
+:root[data-theme="dark"]{--bg1:#2a0a3a;--bg2:#12062b;--card:#2d1744cc;--tx:#ffe9f6;--bd:#6b2d85}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:'Vazirmatn',Tahoma,sans-serif;color:var(--tx);background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed}
+main{max-width:720px;margin:0 auto;padding:20px 14px 60px}
+h1{text-align:center;font-weight:900;font-size:clamp(1.6rem,6vw,2.4rem);background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent;margin:10px 0 18px}
+.add{display:flex;justify-content:center;margin-bottom:20px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:999px;padding:12px 24px;color:#fff;background:linear-gradient(90deg,var(--ac),var(--ac2));cursor:pointer;box-shadow:0 6px 18px #e91e8c55}
+.btn:active{transform:scale(.97)}
+.empty{text-align:center;opacity:.7;padding:40px 10px}
+.item{display:flex;gap:12px;align-items:center;background:var(--card);border:2px solid var(--bd);border-radius:20px;padding:10px;margin-bottom:12px;backdrop-filter:blur(6px)}
+.item.top1{border-color:#ffc107;box-shadow:0 0 20px #ffc10766}
+.badge{min-width:44px;text-align:center;font-size:1.7rem;font-weight:900}
+.item img{width:92px;height:92px;object-fit:cover;border-radius:14px;flex:none}
+.info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.info input{font:inherit;width:100%;border:1px solid var(--bd);border-radius:10px;padding:6px 10px;background:transparent;color:var(--tx)}
+.ctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ctl button{font:inherit;border:1px solid var(--bd);background:transparent;color:var(--tx);border-radius:10px;padding:4px 10px;cursor:pointer}
+.ctl input{width:64px;text-align:center}
+.ctl .del{margin-inline-start:auto;color:#e53935}
+#intro{position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:20px;background:linear-gradient(160deg,#ff9ed2,#b388ff);overflow:hidden;transition:opacity .8s}
+#intro.hide{opacity:0;pointer-events:none}
+#intro h2{margin:0;color:#fff;font-weight:900;font-size:clamp(1.6rem,7vw,2.8rem);text-shadow:0 4px 18px #0004;z-index:2;animation:pop 1.2s ease both}
+#intro .btn{z-index:2;background:#fff;color:#c2185b}
+@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.fall{position:absolute;top:-10%;animation:fall linear infinite;z-index:1;user-select:none}
+@keyframes fall{to{transform:translateY(115vh) rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="intro">
+  <h2>به جمع کصخلا خوش اومدی 💖</h2>
+  <button class="btn" id="enter">ورود 🦋</button>
+</div>
+<main>
+  <h1>🏆 تعیین مقام کصخل ها 🏆</h1>
+  <div class="add">
+    <button class="btn" id="addBtn">➕ افزودن عکس</button>
+    <input type="file" id="file" accept="image/*" multiple hidden>
+  </div>
+  <div id="list"></div>
+</main>
+<script>
+// ---- intro animation ----
+(function(){
+  var intro=document.getElementById('intro'),em=['💖','💗','🦋','⭐','✨','💕','🌟','🦋','💘'];
+  for(var i=0;i<45;i++){
+    var s=document.createElement('span');s.className='fall';s.textContent=em[i%em.length];
+    s.style.left=Math.random()*100+'%';s.style.fontSize=(18+Math.random()*30)+'px';
+    s.style.animationDuration=(3+Math.random()*4)+'s';s.style.animationDelay=(-Math.random()*6)+'s';
+    intro.appendChild(s);
+  }
+  function close(){intro.classList.add('hide');setTimeout(function(){intro.remove()},900)}
+  document.getElementById('enter').onclick=close;
+  setTimeout(close,7000);
+})();
+
+// ---- storage (IndexedDB, with in-memory fallback) ----
+var items=[],dbp=null;
+try{
+  dbp=new Promise(function(res,rej){
+    var r=indexedDB.open('taein-maqam',1);
+    r.onupgradeneeded=function(){r.result.createObjectStore('kv')};
+    r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)};
+  });
+}catch(e){dbp=null}
+function save(){
+  if(!dbp)return;
+  dbp.then(function(db){db.transaction('kv','readwrite').objectStore('kv').put(items,'list')}).catch(function(){});
+}
+function load(){
+  if(!dbp){render();return}
+  dbp.then(function(db){
+    var q=db.transaction('kv').objectStore('kv').get('list');
+    q.onsuccess=function(){items=q.result||[];render()};
+    q.onerror=render;
+  }).catch(render);
+}
+
+// ---- image add ----
+function shrink(file){
+  return new Promise(function(res){
+    var url=URL.createObjectURL(file),im=new Image();
+    im.onload=function(){
+      var m=900,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');
+      c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',.85));
+    };
+    im.onerror=function(){res(null)};im.src=url;
+  });
+}
+var fileEl=document.getElementById('file');
+document.getElementById('addBtn').onclick=function(){fileEl.click()};
+fileEl.onchange=async function(){
+  for(var f of Array.from(fileEl.files)){
+    var d=await shrink(f);
+    if(d)items.push({id:Date.now()+Math.random(),name:'',img:d});
+  }
+  fileEl.value='';save();render();
+};
+
+// ---- ranking ----
+function move(i,j){
+  j=Math.max(0,Math.min(items.length-1,j));if(i===j)return;
+  var x=items.splice(i,1)[0];items.splice(j,0,x);save();render();
+}
+function render(){
+  var L=document.getElementById('list');L.innerHTML='';
+  if(!items.length){L.innerHTML='<div class="empty">هنوز عکسی اضافه نشده 🦋<br>روی «افزودن عکس» بزن</div>';return}
+  var medals=['🥇','🥈','🥉'];
+  items.forEach(function(it,i){
+    var d=document.createElement('div');d.className='item'+(i===0?' top1':'');
+    d.innerHTML='<div class="badge">'+(medals[i]||(i+1))+'</div><img alt=""><div class="info"><input class="nm" placeholder="اسم (اختیاری)" maxlength="40"><div class="ctl"><button class="up">▲</button><button class="dn">▼</button><span>جایگاه</span><input class="pos" type="number" min="1" max="'+items.length+'"><button class="del">🗑 حذف</button></div></div>';
+    d.querySelector('img').src=it.img;
+    var nm=d.querySelector('.nm');nm.value=it.name||'';
+    nm.oninput=function(){it.name=nm.value;save()};
+    var pos=d.querySelector('.pos');pos.value=i+1;
+    pos.onchange=function(){var v=parseInt(pos.value,10);if(v)move(i,v-1);else pos.value=i+1};
+    d.querySelector('.up').onclick=function(){move(i,i-1)};
+    d.querySelector('.dn').onclick=function(){move(i,i+1)};
+    d.querySelector('.del').onclick=function(){if(confirm('این عکس حذف بشه؟')){items.splice(i,1);save();render()}};
+    L.appendChild(d);
+  });
+}
+load();
+</script>
+</body>
+</html>
